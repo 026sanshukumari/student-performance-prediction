@@ -6,7 +6,7 @@ The trained model is deployed as an interactive **Streamlit web application**.
 
 ---
 
-## 🚀 Features
+## Features
 - Predicts student performance (Pass / Fail)
 - Uses a trained Machine Learning model
 - Simple and interactive Streamlit UI
@@ -14,7 +14,7 @@ The trained model is deployed as an interactive **Streamlit web application**.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 - Python
 - Pandas, NumPy
 - Scikit-learn
@@ -22,4 +22,4 @@ The trained model is deployed as an interactive **Streamlit web application**.
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
