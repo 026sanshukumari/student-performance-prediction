@@ -2,7 +2,7 @@ import streamlit as st
 import joblib
 import numpy as np
 
-# Page configuration
+# Page Configuration
 
 st.set_page_config(
     page_title="Student Performance Prediction",
@@ -10,11 +10,11 @@ st.set_page_config(
     layout="centered"
 )
 
-# Load trained ML model (JOBLIB)
+# Load trained model (JOBLIB)
 
 model = joblib.load("student_performance_model.pkl")
 
-# App Title & Description
+# Title & Description
 
 st.title("🎓 Student Performance Prediction")
 
@@ -44,7 +44,7 @@ absences = st.slider("Absences", 0, 50, 5)
 famrel = st.slider(
     "Family Relationship Quality",
     1, 5, 3,
-    help="1 = very bad, 5 = excellent"
+    help="1 = very poor, 5 = excellent"
 )
 
 goout = st.slider(
@@ -59,7 +59,7 @@ health = st.slider(
     help="1 = very poor, 5 = very good"
 )
 
-# Prediction Logic
+# Prediction
 
 if st.button("🔍 Predict Performance"):
 
@@ -68,7 +68,9 @@ if st.button("🔍 Predict Performance"):
         absences, famrel, goout, health
     ]])
 
-    fail_probability = model.predict_proba(input_data)[0][1]
+    # IMPORTANT FIX:
+    # class 0 = FAIL, class 1 = PASS
+    fail_probability = model.predict_proba(input_data)[0][0]
 
     st.subheader("📊 Prediction Result")
 
@@ -82,41 +84,40 @@ if st.button("🔍 Predict Performance"):
         st.error("🚨 Risk Level: HIGH RISK")
         st.write("**Status:** LIKELY TO FAIL")
         st.write(
-            "🛑 **Recommended Action:** Immediate academic counseling, "
+            "🛑 **Recommended Action:** Immediate counseling, "
             "parent involvement, and extra academic support."
         )
 
     elif fail_probability >= 0.40:
         st.warning("⚠️ Risk Level: MODERATE RISK")
-        st.write("**Status:** NEEDS CLOSE MONITORING")
+        st.write("**Status:** NEEDS ATTENTION")
         st.write(
-            "📌 **Recommended Action:** Provide guidance, track progress, "
-            "and improve study routine."
+            "📌 **Recommended Action:** Monitor performance, "
+            "improve study habits, and reduce absences."
         )
 
     else:
         st.success("✅ Risk Level: LOW RISK")
         st.write("**Status:** ON TRACK")
         st.write(
-            "🎯 **Recommended Action:** Continue current study plan "
-            "and maintain consistency."
+            "🎯 **Recommended Action:** Maintain consistency "
+            "and current study routine."
         )
 
 # Worst Case Scenario Demo
 
 st.markdown("---")
-st.subheader("⚠️ Worst Case Scenario Simulation")
+st.subheader("⚠️ Worst Case Scenario Demo")
 
 st.write(
-    "This simulation demonstrates how the model behaves "
-    "under extreme negative conditions."
+    "This demonstrates model behavior under extremely poor conditions."
 )
 
 if st.button("🚨 Simulate Worst Case"):
     worst_case = np.array([[0, 0, 1, 4, 50, 1, 5, 1]])
-    worst_prob = model.predict_proba(worst_case)[0][1]
+    worst_fail_prob = model.predict_proba(worst_case)[0][0]
 
-    st.metric("Fail Probability", f"{worst_prob:.2f}")
+    st.metric("Fail Probability", f"{worst_fail_prob:.2f}")
     st.error("❗ Risk Level: EXTREME RISK")
     st.write("**Status:** VERY LIKELY TO FAIL")
     st.write(
