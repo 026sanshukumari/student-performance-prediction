@@ -2,7 +2,7 @@ import streamlit as st
 import joblib
 import numpy as np
 
-# Page Configuration
+# Page configuration
 
 st.set_page_config(
     page_title="Student Performance Prediction",
@@ -68,7 +68,7 @@ if st.button("🔍 Predict Performance"):
         absences, famrel, goout, health
     ]])
 
-    # IMPORTANT FIX:
+    # IMPORTANT:
     # class 0 = FAIL, class 1 = PASS
     fail_probability = model.predict_proba(input_data)[0][0]
 
@@ -80,6 +80,7 @@ if st.button("🔍 Predict Performance"):
     )
 
     # Risk Interpretation
+    
     if fail_probability >= 0.75:
         st.error("🚨 Risk Level: HIGH RISK")
         st.write("**Status:** LIKELY TO FAIL")
@@ -104,22 +105,25 @@ if st.button("🔍 Predict Performance"):
             "and current study routine."
         )
 
-# Worst Case Scenario Demo
+    # Worst Case Scenario (ONLY if student likely to fail)
+    
+    if fail_probability >= 0.75:
 
-st.markdown("---")
-st.subheader("⚠️ Worst Case Scenario Demo")
+        st.markdown("---")
+        st.subheader("⚠️ Worst Case Scenario (High Failure Risk)")
 
-st.write(
-    "This demonstrates model behavior under extremely poor conditions."
-)
+        st.write(
+            "This scenario shows how severe the outcome could be "
+            "if no corrective action is taken."
+        )
 
-if st.button("🚨 Simulate Worst Case"):
-    worst_case = np.array([[0, 0, 1, 4, 50, 1, 5, 1]])
-    worst_fail_prob = model.predict_proba(worst_case)[0][0]
+        if st.button("🚨 Simulate Worst Case"):
+            worst_case = np.array([[0, 0, 1, 4, 50, 1, 5, 1]])
+            worst_fail_prob = model.predict_proba(worst_case)[0][0]
 
-    st.metric("Fail Probability", f"{worst_fail_prob:.2f}")
-    st.error("❗ Risk Level: EXTREME RISK")
-    st.write("**Status:** VERY LIKELY TO FAIL")
-    st.write(
-        "🆘 **Action Required:** Immediate intervention and structured academic recovery plan."
-    )
+            st.metric("Fail Probability", f"{worst_fail_prob:.2f}")
+            st.error("❗ Risk Level: EXTREME RISK")
+            st.write("**Status:** VERY LIKELY TO FAIL")
+            st.write(
+                "🆘 **Action Required:** Immediate intervention and structured academic recovery plan."
+            )
