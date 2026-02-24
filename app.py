@@ -1,97 +1,143 @@
 import streamlit as st
-import numpy as np
+import pandas as pd
 import joblib
 
-# Page config
+# Page configuration
 
 st.set_page_config(
     page_title="Student Performance Prediction",
+    page_icon="🎓",
     layout="centered"
 )
 
-# Load model
+# Load trained model (JOBLIB)
 
-model = joblib.load("model.joblib")
+@st.cache_resource
+def load_model():
+    return joblib.load("student_performance_model.pkl")
 
-# Title & description
+model = load_model()
+
+# App Title & Description
 
 st.title("🎓 Student Performance Prediction")
 st.write(
-    "This application predicts the probability of a student failing "
-    "based on academic performance, study habits, and social factors."
+    """
+    This application predicts the **probability of a student failing**
+    based on academic performance, study habits, and social factors.
+    """
 )
 
-# Input section
+# Input Section
 
-st.subheader("📥 Enter Student Details")
+st.header("📥 Enter Student Details")
 
 G1 = st.slider("G1 Marks", 0, 20, 10)
 G2 = st.slider("G2 Marks", 0, 20, 10)
-studytime = st.slider("Study Time (hours per week)", 1, 4, 2)
-failures = st.slider("Past Failures", 0, 4, 0)
-absences = st.slider("Absences", 0, 50, 5)
-family = st.slider("Family Relationship Quality", 1, 5, 3)
-goout = st.slider("Going Out Frequency", 1, 5, 3)
-health = st.slider("Health Status", 1, 5, 3)
 
-# Prediction
+studytime = st.slider(
+    "Study Time (hours per week)",
+    1, 4, 2,
+    help="1 = very low, 4 = very high"
+)
 
-input_data = np.array([[G1, G2, studytime, failures, absences, family, goout, health]])
-fail_probability = model.predict_proba(input_data)[0][0]
+failures = st.slider(
+    "Past Failures",
+    0, 4, 0,
+    help="Number of past subject failures"
+)
 
-st.markdown("---")
-st.subheader("📊 Prediction Result")
+absences = st.slider(
+    "Absences",
+    0, 50, 5,
+    help="Total classes missed"
+)
 
-st.metric("Fail Probability", f"{fail_probability:.2f}")
+famrel = st.slider(
+    "Family Relationship Quality",
+    1, 5, 3,
+    help="1 = very bad, 5 = excellent"
+)
 
-# Risk logic
+goout = st.slider(
+    "Going Out Frequency",
+    1, 5, 3,
+    help="1 = very low, 5 = very high"
+)
 
-if fail_probability >= 0.75:
-    st.error("🚨 Risk Level: HIGH RISK")
-    st.write("**Status:** LIKELY TO FAIL")
-    st.write(
-        "🛑 **Recommended Action:** Immediate counseling, parent involvement, "
-        "and extra academic support."
+health = st.slider(
+    "Health Status",
+    1, 5, 3,
+    help="1 = very poor, 5 = very good"
+)
+
+# Prediction Button
+
+if st.button("🔍 Predict Performance"):
+
+    input_data = pd.DataFrame([{
+        "G1": G1,
+        "G2": G2,
+        "studytime": studytime,
+        "failures": failures,
+        "absences": absences,
+        "famrel": famrel,
+        "goout": goout,
+        "health": health
+    }])
+
+    # Probability of FAILING (class 0)
+    fail_prob = model.predict_proba(input_data)[0][0]
+
+    # Risk interpretation
+
+    if fail_prob < 0.30:
+        risk = "LOW RISK"
+        status = "ON TRACK"
+        action = "Maintain current study routine."
+        color = "green"
+    elif fail_prob < 0.60:
+        risk = "MODERATE RISK"
+        status = "NEEDS ATTENTION"
+        action = "Monitor progress and improve study consistency."
+        color = "orange"
+    else:
+        risk = "HIGH RISK"
+        status = "LIKELY TO FAIL"
+        action = "Immediate counseling and academic support required."
+        color = "red"
+
+    # Output Section
+
+    st.subheader("📊 Prediction Result")
+
+    st.metric(
+        label="Fail Probability",
+        value=f"{fail_prob:.2f}"
     )
 
-elif fail_probability >= 0.40:
-    st.warning("⚠️ Risk Level: MODERATE RISK")
-    st.write("**Status:** NEEDS ATTENTION")
-    st.write(
-        "📘 **Recommended Action:** Improve study consistency and monitor progress closely."
+    st.markdown(
+        f"### 🚨 Risk Level: **:{color}[{risk}]**"
     )
 
-else:
-    st.success("✅ Risk Level: LOW RISK")
-    st.write("**Status:** ON TRACK")
-    st.write(
-        "🎯 **Recommended Action:** Maintain current study routine and consistency."
+    st.markdown(
+        f"**Status:** {status}"
     )
 
-# Worst Case Scenario
-
-if "show_worst" not in st.session_state:
-    st.session_state.show_worst = False
-
-# Worst case ONLY when failure risk is high
-if fail_probability >= 0.75:
-    st.markdown("---")
-    st.subheader("⚠️ Worst Case Scenario (High Failure Risk)")
-    st.write(
-        "This scenario shows how severe the outcome could be "
-        "if no corrective action is taken."
+    st.markdown(
+        f"🛑 **Recommended Action:** {action}"
     )
 
-    if st.button("🚨 Simulate Worst Case"):
-        st.session_state.show_worst = True
-
-    if st.session_state.show_worst:
-        worst_case = np.array([[0, 0, 1, 4, 50, 1, 5, 1]])
-        worst_fail_prob = model.predict_proba(worst_case)[0][0]
-
-        st.metric("Fail Probability", f"{worst_fail_prob:.2f}")
-        st.error("❗ Risk Level: EXTREME RISK")
-        st.write("**Status:** VERY LIKELY TO FAIL")
-        st.write(
-            "🆘 **Action Required:** Immediate intervention and a structured academic recovery plan."
-        )
+    # -----------------------------
+    # Worst Case Scenario (ONLY if high risk)
+    # -----------------------------
+    if fail_prob >= 0.60:
+        with st.expander("⚠️ Worst Case Scenario (High Failure Risk)"):
+            st.write(
+                """
+                This scenario illustrates what could happen
+                **if no corrective action is taken**.
+                """
+            )
+            st.markdown("❗ **Very likely to fail final exams**")
+            st.markdown("🆘 **Urgent academic recovery plan required**")
