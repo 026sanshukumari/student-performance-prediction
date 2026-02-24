@@ -1,22 +1,22 @@
 import streamlit as st
-import pickle
+import joblib
 import numpy as np
 
-# Load trained model
+# Load trained model (JOBLIB)
 
-with open("student_performance_model.pkl", "rb") as file:
-    model = pickle.load(file)
+model = joblib.load("student_performance_model.pkl")
 
-# App Title & Description
+# App config
 
-st.set_page_config(page_title="Student Performance Prediction", layout="centered")
+st.set_page_config(
+    page_title="Student Performance Prediction",
+    layout="centered"
+)
 
-st.title("🎓 Student Performance Prediction")
+st.title("Student Performance Prediction")
 st.write(
-    """
-    This app predicts the **probability of a student failing** based on
-    academic, behavioral, and social factors.
-    """
+    "This app predicts the **probability of a student failing** "
+    "based on academic, behavioral, and social factors."
 )
 
 st.markdown("---")
@@ -35,7 +35,6 @@ studytime = st.sidebar.slider(
 )
 
 failures = st.sidebar.slider("Past Failures", 0, 4, 0)
-
 absences = st.sidebar.slider("Absences", 0, 50, 5)
 
 famrel = st.sidebar.slider(
@@ -58,17 +57,12 @@ health = st.sidebar.slider(
 
 st.markdown("---")
 
-# Prediction Button
+# Prediction
 
 if st.button("Predict Performance"):
-
-    # Prepare input for model
     input_data = np.array([[g1, g2, studytime, failures, absences, famrel, goout, health]])
-
-    # Predict probability
     fail_probability = model.predict_proba(input_data)[0][1]
 
-    # Risk level
     if fail_probability < 0.3:
         risk = "LOW RISK"
         color = "green"
@@ -82,9 +76,7 @@ if st.button("Predict Performance"):
         color = "red"
         action = "Immediate counseling and extra academic help required."
 
-    # Display results
     st.subheader("Prediction Result")
-
     st.markdown(
         f"""
         **Fail Probability:** `{fail_probability:.2f}`  
@@ -96,19 +88,16 @@ if st.button("Predict Performance"):
 
 st.markdown("---")
 
-# Worst Case Scenario Demo
+# Worst Case Scenario
 
 st.subheader("Worst Case Scenario Demo")
 
 if st.button("Simulate Worst Case Student"):
     worst_case = np.array([[5, 5, 1, 4, 40, 1, 5, 1]])
     prob = model.predict_proba(worst_case)[0][1]
-
     st.error(
-        f"""
-        ⚠️ **Worst Case Fail Probability:** {prob:.2f}  
-        This student is at **very high risk of failing**.
-        """
+        f"⚠️ Worst Case Fail Probability: {prob:.2f}\n"
+        "This student is at **very high risk of failing**."
     )
 
 st.markdown("---")
