@@ -4,7 +4,9 @@ This project is a **Machine Learning–based web application** that predicts the
 
 The goal of this system is **early risk detection**, so that timely academic intervention can be provided to students who are likely to fail.
 
-##  Features
+---
+
+## 🚀 Features
 
 - Predicts **failure probability** using a trained ML model
 - Categorizes students into:
@@ -18,7 +20,7 @@ The goal of this system is **early risk detection**, so that timely academic int
 
 ---
 
-## Machine Learning Model
+## 🧠 Machine Learning Model
 
 - **Algorithm:** Random Forest Classifier  
 - **Reason:** Handles non-linear relationships well and is robust to noise  
@@ -28,17 +30,18 @@ The goal of this system is **early risk detection**, so that timely academic int
 
 ## 📊 Input Features
 
- Feature - Description 
+| Feature | Description |
+|------|------------|
+| G1 | First period marks |
+| G2 | Second period marks |
+| studytime | Weekly study time (1–4 scale) |
+| failures | Number of past failures |
+| absences | Total class absences |
+| famrel | Family relationship quality (1–5) |
+| goout | Going out frequency (1–5) |
+| health | Health status (1–5) |
 
- G1 : First period marks 
- G2 : Second period marks 
- studytime : Weekly study time (1–4 scale) 
- failures : Number of past failures 
- absences : Total class absences 
- famrel : Family relationship quality (1–5) 
- goout : Going out frequency (1–5) 
- health : Health status (1–5) 
- 
+---
 
 ## 📈 Output
 
@@ -48,6 +51,7 @@ The goal of this system is **early risk detection**, so that timely academic int
 - **Recommended Academic Action**
 - **Worst Case Scenario** (shown only for high risk students)
 
+---
 
 ## 🖥️ Web Application
 
@@ -56,5 +60,6 @@ The application is built using **Streamlit**, providing:
 - Real-time predictions
 - Clear visual interpretation of results
 
+---
 
 ## 📦 Project Structure
